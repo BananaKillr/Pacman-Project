@@ -8,7 +8,8 @@ const int height = 20;
 
 int pacmanX, pacmanY, score;
 int oldPacmanX, oldPacmanY;
-bool gameOver;
+bool gameOver; //used in main loop to know when to end loop
+bool win; //used to check if win/loss and draw next menu
 char map[height][width];
 
 bool leftKeyPressed;
