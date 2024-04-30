@@ -6,6 +6,7 @@ class Game
 		int y_coordinate;
 		int old_x_coordinate;
 		int old_y_coordinate;
+		char entityChar;
 		char old; //used to check if enemy was standding on a dot to restore it after movement
 	};
 
