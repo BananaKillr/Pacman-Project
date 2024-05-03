@@ -9,7 +9,7 @@ void Game::CalcEnemyMovement() {
 
 	switch (difficulty)
 	{
-	case 0:
+	case 0: //Uses random movement
 	case 1:
 		for (int i = 0; i < 4; i++)
 		{
@@ -18,8 +18,8 @@ void Game::CalcEnemyMovement() {
 			int enemy_y;
 
 			directions.clear();
-			enemy_x = enemies[i].x_coordinate;
-			enemy_y = enemies[i].y_coordinate;
+			enemy_x = enemies[i].position.first;
+			enemy_y = enemies[i].position.second;
 
 			if (gameBoard[enemy_y + 1][enemy_x] != '#') directions.push_back(0);
 			if (gameBoard[enemy_y - 1][enemy_x] != '#') directions.push_back(2);
@@ -31,76 +31,60 @@ void Game::CalcEnemyMovement() {
 			switch (pickedDirection)
 			{
 			case 0: //up
-				enemies[i].y_coordinate++;
+				enemies[i].position.first--;
 				break;
 			case 1: //right
-				enemies[i].x_coordinate++;
+				enemies[i].position.second--;
 				break;
 			case 2: //down
-				enemies[i].y_coordinate--;
+				enemies[i].position.first++;
 				break;
 			default: //left
-				enemies[i].x_coordinate--;
+				enemies[i].position.second++;
 				break;
 			}
 		}
 		break;
-	case 2: //implelemnt BFS
-
-
-
+	case 2: //Uses BFS
 		for (int i = 0; i < 4; i++)
 		{
-			int visited[height][width] = { 0 };
-			std::queue<int> x_queue, y_queue;
-			std::vector<int> path_x, path_y;
-
-			int enemy_x = enemies[i].x_coordinate;
-			int enemy_y = enemies[i].y_coordinate;
-
-			x_queue.push(enemy_x);
-			y_queue.push(enemy_y);
-
-			while (!x_queue.empty())
-			{
-				//Set current node to front of queue, then remove current note from queue
-				enemy_x = x_queue.front();
-				enemy_y = y_queue.front();
-				x_queue.pop();
-				y_queue.pop();
-
-				//Check if char found
-				if (gameBoard[enemy_y][enemy_x] == pacman.entityChar)
-				{
-					break;
-				}
-
-				//Checks neighbors, adds to queues if valid movement
-				if (gameBoard[enemy_y + 1][enemy_x] != '#' && visited[enemy_y + 1][enemy_x] == 0)
-				{
-					y_queue.push(enemy_y + 1);
-					x_queue.push(enemy_x);
-					visited[enemy_y][enemy_x] = 1;
-				}
-				if (gameBoard[enemy_y - 1][enemy_x] != '#' && visited[enemy_y - 1][enemy_x] == 0)
-				{
-					y_queue.push(enemy_y - 1);
-					x_queue.push(enemy_x);
-					visited[enemy_y][enemy_x] = 1;
-				}
-				if (gameBoard[enemy_y][enemy_x + 1] != '#' && visited[enemy_y][enemy_x + 1] == 0) {
-					y_queue.push(enemy_y);
-					x_queue.push(enemy_x + 1);
-					visited[enemy_y][enemy_x] = 1;
-				}
-				if (gameBoard[enemy_y][enemy_x - 1] != '#' && visited[enemy_y][enemy_x - 1] == 0)
-				{
-					y_queue.push(enemy_y);
-					x_queue.push(enemy_x - 1);
-					visited[enemy_y][enemy_x] = 1;
-				}
-			}
+			pair<int, int> next = nextStep(enemies[i].position, pacman.position);
+			enemies[i].position = next;
 		}
 		break;
+	}
+}
+
+pair<int, int> Game::nextStep(pair<int, int> pacmanPosition, pair<int, int> enemyPosition) {
+
+	int visited[height][width] = { 0 };
+	vector<vector<pair<int, int>>> parent(height, vector<pair<int, int>>(width, make_pair(-1, -1)));
+	queue<pair<int, int>> q;
+
+	q.push(enemyPosition);
+	visited[enemyPosition.second][enemyPosition.first] = 1;
+
+	while (!q.empty()) {
+		pair<int, int> current = q.front();
+		q.pop();
+
+		if (current == pacmanPosition) {
+
+			while (parent[current.first][current.second] != enemyPosition) { //reconstruct path
+				current = parent[current.first][current.second];
+			}
+			return current; //return next step only
+		}
+
+		for (auto direction : directions) {
+			int x = current.first + direction.first;
+			int y = current.second + direction.second;
+
+			if (gameBoard[x][y] != '#' && visited[x][y] == 0) {
+				q.push({ x , y });
+				visited[x][y] = 1;
+				parent[x][y] = current;
+			}
+		}
 	}
 }

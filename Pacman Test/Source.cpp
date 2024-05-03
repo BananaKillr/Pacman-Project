@@ -136,17 +136,15 @@ void Update() {
 int main() {
     Initialize();
 
-    // Main game loop
     while (!gameOver) {
-
         Draw();
         Input();
         Update();
-
-        Sleep(250);
+        Sleep(100);
     }
 
     cout << "Game Over!" << endl;
 
     return 0;
 }
+
