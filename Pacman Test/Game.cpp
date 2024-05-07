@@ -88,3 +88,4 @@ pair<int, int> Game::nextStep(pair<int, int> pacmanPosition, pair<int, int> enem
 		}
 	}
 }
+

@@ -1,6 +1,7 @@
 #pragma once
 #include <utility>
 #include <vector>
+#include <unordered_map>
 using namespace std;
 
 class Game
@@ -8,13 +9,12 @@ class Game
 
 	struct gameEntity {
 		pair<int, int> position; //Row,col
-		int old_x_coordinate;
-		int old_y_coordinate;
+		pair<int, int> oldPosition;
 		char entityChar;
 		char old; //used to check if enemy was standding on a dot to restore it after movement
 	};
 
-
+	unordered_map<int, Save> saves;
 
 	static const int width = 20; //CHANGE THIS TO ACTUAL MAP SIZE, map size should be the same between all the levels
 	static const int height = 20;
@@ -41,11 +41,21 @@ class Game
 	int difficulty;
 	int level;
 
+	void Menu(); //Runs when program first launched, draws menu
 	void Initialize(); //Runs once at start, sets initial gameBoard, input flags, and enemy/player positions
 	void Draw(); //Draws current map state
 	void Input(); //Takes an input from the user, checks if it is valid, if so changes direction
 	void CalcEnemyMovement(); //Calculates the next move for the enemy, random if difficulty is 1 or 2, BFS if difficulty is 3, maybe split into seperate functions?
-	void Update(); //Changes the coordinates of pacman based on Input()
-	pair<int, int> nextStep(pair<int,int> pacmanPosition, pair<int,int> enemyPosition);
+	void Update(); //Changes the coordinates of pacman based on Input(), checks if lose condiiton met
+	pair<int, int> nextStep(pair<int,int> pacmanPosition, pair<int,int> enemyPosition); //Returns the next coordinate an enemy needs to move to, used in CalcEnemyMovement
 };
 
+class Save {
+	char username[5];
+	unordered_map<int, int[3]> highScores;
+
+	Save(char username[5]);
+	Save(string save);
+	void newScore(int level, int score);
+	string toString();
+};
