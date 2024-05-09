@@ -2,7 +2,19 @@
 #include <iostream>
 #include <vector>
 #include <queue>
+#include <Windows.h>
+using namespace std;
 
+Game::Game() {
+	saves["banana"] = new Save("banana");
+	saves["banana"]->highScores[2].push(8000);
+	saves["banana"]->highScores[2].push(5000);
+
+	levels[1] = "1. Map 1";
+	levels[2] = "2. Map 2";
+	levels[3] = "3. Map 3";
+	Menu();
+};
 
 void Game::CalcEnemyMovement() {
 
@@ -48,14 +60,13 @@ void Game::CalcEnemyMovement() {
 	case 2: //Uses BFS
 		for (int i = 0; i < 4; i++)
 		{
-			pair<int, int> next = nextStep(enemies[i].position, pacman.position);
-			enemies[i].position = next;
+			enemies[i].position = NextStep(enemies[i].position);
 		}
 		break;
 	}
 }
 
-pair<int, int> Game::nextStep(pair<int, int> pacmanPosition, pair<int, int> enemyPosition) {
+pair<int, int> Game::NextStep(pair<int, int> enemyPosition) {
 
 	int visited[height][width] = { 0 };
 	vector<vector<pair<int, int>>> parent(height, vector<pair<int, int>>(width, make_pair(-1, -1)));
@@ -68,7 +79,7 @@ pair<int, int> Game::nextStep(pair<int, int> pacmanPosition, pair<int, int> enem
 		pair<int, int> current = q.front();
 		q.pop();
 
-		if (current == pacmanPosition) {
+		if (current == pacman.position) {
 
 			while (parent[current.first][current.second] != enemyPosition) { //reconstruct path
 				current = parent[current.first][current.second];
@@ -80,7 +91,7 @@ pair<int, int> Game::nextStep(pair<int, int> pacmanPosition, pair<int, int> enem
 			int x = current.first + direction.first;
 			int y = current.second + direction.second;
 
-			if (gameBoard[x][y] != '#' && visited[x][y] == 0) {
+			if (gameBoard[y][x] != '#' && visited[x][y] == 0) {
 				q.push({ x , y });
 				visited[x][y] = 1;
 				parent[x][y] = current;
@@ -89,3 +100,160 @@ pair<int, int> Game::nextStep(pair<int, int> pacmanPosition, pair<int, int> enem
 	}
 }
 
+void Game::Menu() {
+	input = 0;
+	while (input < 1 || input > 3) {
+		system("cls");
+		cout << "Pacman!\n" << endl << "1. New Game" << endl << "2. Continue" << endl << "3. Exit" << endl << "\nSelection: ";
+		cin >> input;
+	}
+
+	system("cls");
+
+
+
+	switch(input) {
+	case 1:
+		cout << "Enter Username: ";  
+		cin >> currentUser;
+		if (saves.find(currentUser) != saves.end()) {
+			cout << "User Already Exists. Continue Game.";
+			Sleep(2000);
+			Menu();
+			return;
+			break;
+		}
+		saves[currentUser] = new Save(currentUser);
+		level = 0;
+		while (level < 1 || level > levels.size()) {
+			system("cls");
+			cout << "Select Map\n\n";
+			for (int i = 1; i <= levels.size(); i++) cout << levels[i] << endl;
+			cout << "\nInput: ";
+			cin >> level;
+		}
+		difficulty = 0;
+		while (difficulty < 1 || difficulty > 3) {
+			system("cls");
+			cout << "Select Difficulty\n\n1. Easy\n2. Medium\n3. Hard\n\nInput: ";
+			std::cin >> difficulty;
+		}
+		break;
+	case 2:
+
+		cout << "Enter Username: "; cin >> currentUser;
+
+		// If user not found
+		if (saves.find(currentUser) == saves.end()) 
+		{
+			cout << "User Does Not Exist. Start New Game.";
+			Sleep(2000);
+			Menu();
+			return;
+		}
+
+		// If user found
+		input = 0;
+		while (input != 1 && input != 2) {
+			system("cls");
+			cout << "1. Play\n2. See Scores\n\nInput: ";
+			cin >> input;
+		}
+
+		switch (input) {
+		case 1:
+			level = 0;
+			while (level < 1 || level > levels.size()) {
+				system("cls");
+				cout << "Select Map\n\n";
+				for (int i = 1; i <= levels.size(); i++) cout << levels[i] << endl;
+				cout << "\nInput: ";
+				cin >> level;
+			}
+
+			difficulty = 0;
+			while (difficulty < 1 || difficulty > 3) {
+				system("cls");
+				cout << "Select Difficulty\n\n1. Easy\n2. Medium\n3. Hard\n\nInput: ";
+				std::cin >> difficulty;
+			}
+			break;
+		case 2:
+			level = 0;
+			while (level < 1 || level > levels.size()) {
+				system("cls");
+				cout << "Select Map\n\n";
+				for (int i = 1; i <= levels.size(); i++) cout << levels[i] << endl;
+				cout << "\nInput: ";
+				cin >> level;
+			}
+
+			system("cls");
+			priority_queue<int, std::vector<int>, std::less<int>> copyScores = saves[currentUser]->highScores[level];
+
+			if (copyScores.empty()) cout << "No Scores";
+			else {
+				cout << "Highscores For Map " << level << endl;
+				for (int i = 1; i < 4; i++)
+				{
+					if (!copyScores.empty()) {
+						cout << i << ". " << copyScores.top() << endl;
+						copyScores.pop();
+					}
+					else break;
+				}
+			}
+			cin.ignore();
+			cin.get();
+			Menu();
+			return;
+			break;
+		}
+
+		break;
+	case 3:
+		ExitGame();
+		return;
+		break;
+	default:
+		break;
+
+	}
+
+	Initialize();
+}
+
+void Game::Initialize() {
+	system("cls");
+
+	switch (level) {
+	case 1:
+		CopyMap(map1, gameMap);
+		break;
+	case 2:
+		CopyMap(map2, gameMap);
+		break;
+	case 3:
+		CopyMap(map3, gameMap);
+		break;
+	}
+
+
+}
+
+void Game::CopyMap(const char source[][height], char dest[][height]) {
+	for (int i = 0; i < width; ++i) {
+		for (int j = 0; j < width; ++j) {
+			dest[i][j] = source[i][j];
+		}
+	}
+}
+
+void Game::ExitGame() {
+	system("cls");
+	cout << "Exitting...";
+}
+
+Save::Save(string username) {
+	this->userName = username;
+}

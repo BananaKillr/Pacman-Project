@@ -1,5 +1,6 @@
 #include <iostream>
 #include <windows.h>
+#include "Game.h"
 
 using namespace std;
 
@@ -133,18 +134,27 @@ void Update() {
     oldPacmanY = pacmanY;
 }
 
-int main() {
-    Initialize();
+void Menu() {
+    int input;
+    cout << "1. New Game" << endl << "2. Continue" << endl << "3. Exit" << endl;
+    cin >> input;
 
-    while (!gameOver) {
-        Draw();
-        Input();
-        Update();
-        Sleep(100);
+    switch (input) {
+    case 1:
+        cout << "Select Difficulty:" << endl << endl << "Easy" << endl << "Medium" << endl << "Hard" << endl;
+        break;
+        switch (input) {
+        default:
+            break;
+        }
+    case 2:
+        break;
+    case 3:
+        break;
     }
+}
 
-    cout << "Game Over!" << endl;
-
-    return 0;
+int main() {
+    Game* game = new Game();
 }
 
