@@ -60,13 +60,13 @@ void Draw() {
     // Draw map
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
-            cout << map[y][x] << ' ';
+            std::cout << map[y][x] << ' ';
         }
-        cout << endl;
+        std::cout << endl;
     }
 
     // Print score
-    cout << "Score: " << score << endl;
+    std::cout << "Score: " << score << endl;
 }
 
 void Input() {
@@ -132,26 +132,6 @@ void Update() {
     // Update old position
     oldPacmanX = pacmanX;
     oldPacmanY = pacmanY;
-}
-
-void Menu() {
-    int input;
-    cout << "1. New Game" << endl << "2. Continue" << endl << "3. Exit" << endl;
-    cin >> input;
-
-    switch (input) {
-    case 1:
-        cout << "Select Difficulty:" << endl << endl << "Easy" << endl << "Medium" << endl << "Hard" << endl;
-        break;
-        switch (input) {
-        default:
-            break;
-        }
-    case 2:
-        break;
-    case 3:
-        break;
-    }
 }
 
 int main() {
