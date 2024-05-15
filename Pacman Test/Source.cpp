@@ -134,7 +134,103 @@ void Update() {
     oldPacmanY = pacmanY;
 }
 
-int main() {
-    Game* game = new Game();
+#include <string>
+#include <unordered_map>
+#include <queue>
+#include <vector>
+#include <sstream>
+
+
+
+class Vave {
+public:
+    std::string userName;
+    std::unordered_map<int, std::priority_queue<int, std::vector<int>, std::less<int>>> highScores;
+
+    Vave(string username) {
+        userName = username;
+    }
+
+    std::string ToString() {
+        std::string result;
+
+        // Convert userName to string
+        result += userName + "\n";
+
+        // Convert highScores to string
+        for (auto pair : highScores) {
+            result += std::to_string(pair.first) + " ";
+            auto scores = pair.second;
+            while (!scores.empty()) {
+                result += std::to_string(scores.top()) + " ";
+                scores.pop();
+            }
+            result += "\n";
+        }
+
+        return result;
+    }
+};
+
+std::unordered_map<std::string, Vave*> saves;
+
+void LoadFromFile(string readString) {
+    std::queue<std::string> strings;
+    strings.push("");
+    std::string::size_type pos = 0;
+    std::string::size_type prev = 0;
+
+    while ((pos = readString.find("\n", prev)) != std::string::npos)
+    {
+        strings.push(readString.substr(prev, pos - prev));
+        prev = pos + 1;
+    }
+
+    std::vector<std::string> line;
+    string username;
+    unordered_map<int, priority_queue<int, std::vector<int>, std::less<int>>> highScores;
+    string currentString;
+    int level;
+    
+
+    while(!strings.empty()) {
+        if (strings.front() == "") {
+            strings.pop();
+            if (strings.empty()) {
+                //TODO create Save object and add to hashmap
+                break;
+            }
+            username = strings.front();
+            strings.pop();
+            highScores.clear();
+        }
+        else { // [levelnum]: score1 score2 ..... scoren
+            currentString = strings.front();
+            pos = 0;
+            prev = 0;
+            line.clear();
+
+            while ((pos = currentString.find(" ", prev)) != std::string::npos)
+            {
+                line.push_back(currentString.substr(prev, pos - prev));
+                prev = pos + 1;
+            } //split level line using " " as delimiter
+
+            level = std::stoi(line[0]);
+
+            for (auto it = line.begin() + 1; it != line.end(); it++) {
+                highScores[level].push(std::stoi(*it));
+            }
+
+            strings.pop();
+        }
+    }
 }
 
+
+
+int main() {
+    Game* game = new Game();
+
+    return 0;
+}

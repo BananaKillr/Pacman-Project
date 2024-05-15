@@ -3,16 +3,15 @@
 #include <vector>
 #include <queue>
 #include <Windows.h>
+#include <sstream>
+#include <fstream>	
 using namespace std;
 
 Game::Game() {
-	saves["banana"] = new Save("banana");
-	saves["banana"]->highScores[2].push(8000);
-	saves["banana"]->highScores[2].push(5000);
-
 	levels[1] = "1. Map 1";
 	levels[2] = "2. Map 2";
 	levels[3] = "3. Map 3";
+	LoadFromFile();
 	Menu();
 };
 
@@ -122,7 +121,8 @@ void Game::Menu() {
 		std::cin >> currentUser;
 		if (saves.find(currentUser) != saves.end()) {
 			std::cout << "User Already Exists. Continue Game.";
-			Sleep(2000);
+			std::cin.ignore();
+			std::cin.get();
 			Menu();
 			return;
 			break;
@@ -151,7 +151,8 @@ void Game::Menu() {
 		if (saves.find(currentUser) == saves.end()) 
 		{
 			std::cout << "User Does Not Exist. Start New Game.";
-			Sleep(2000);
+			std::cin.ignore();
+			std::cin.get();
 			Menu();
 			return;
 		}
@@ -274,6 +275,8 @@ void Game::Initialize() {
 		Sleep(500);
 	}
 	
+	saves[currentUser]->highScores[level].push(score); // add score  to save
+
 	system("cls");
 
 	if (win) {
@@ -282,6 +285,10 @@ void Game::Initialize() {
 	else {
 		cout << "You Lost :(\n\nFinal Score: " << score;
 	}
+
+	std::cin.ignore();
+	std::cin.get();
+	Menu();
 }
 
 void Game::Draw() {
@@ -455,6 +462,99 @@ void Game::CopyMap(char source[height][width], char dest[height][width]) {
 void Game::ExitGame() {
 	system("cls");
 	std::cout << "Exitting...";
+	std::string saveString;
+
+
+	for (auto save : saves) {
+		saveString += save.second->ToString();
+	}
+
+	std::ofstream output("saves.txt");
+
+	if (output.is_open()) {
+		output << saveString;
+		output.close();
+		cout << "Saved Successfully";
+	}
+	else {
+		cout << "Error Saving!";
+		output.close();
+	}
+}
+
+void Game::LoadFromFile() {
+	string readString;
+	string fileLine;
+	std::ifstream input("saves.txt");
+
+	if (!input.is_open()) {
+		cout << "Error Reading File";
+		return;
+	}
+
+	while (std::getline(input, fileLine)) {
+		readString += fileLine;
+		readString += '\n';
+	}
+
+	std::queue<std::string> strings;
+	strings.push("");
+	std::string::size_type pos = 0;
+	std::string::size_type prev = 0;
+
+	while ((pos = readString.find("\n", prev)) != std::string::npos)
+	{
+		strings.push(readString.substr(prev, pos - prev));
+		prev = pos + 1;
+	}
+
+	std::vector<std::string> line;
+	string username;
+	unordered_map<int, priority_queue<int, std::vector<int>, std::less<int>>> highScores;
+	string currentString;
+	Save* save;
+	int level;
+	bool first = true;
+
+
+	while (!strings.empty()) {
+		if (strings.front() == "") {
+			strings.pop();
+			if (!strings.empty() && !first)
+			{
+				save = new Save(username);
+				save->highScores = highScores;
+				saves[username] = save;
+			}
+			username = strings.front();
+			strings.pop();
+			highScores.clear();
+		}
+		else { // [levelnum]: score1 score2 ..... scoren
+			currentString = strings.front();
+			pos = 0;
+			prev = 0;
+			line.clear();
+
+			while ((pos = currentString.find(" ", prev)) != std::string::npos)
+			{
+				line.push_back(currentString.substr(prev, pos - prev));
+				prev = pos + 1;
+			} //split level line using " " as delimiter
+
+			level = std::stoi(line[0]);
+
+			for (auto it = line.begin() + 1; it != line.end(); it++) {
+				highScores[level].push(std::stoi(*it));
+			}
+
+			strings.pop();
+			first = false;
+		}
+	}
+	save = new Save(username);
+	save->highScores = highScores;
+	saves[username] = save;
 }
 
 bool Game::EnemyInPosition(int x, int y) {
@@ -470,3 +570,24 @@ bool Game::EnemyInPosition(int x, int y) {
 Save::Save(string username) {
 	this->userName = username;
 }
+
+std::string Save::ToString() {
+	std::string result;
+
+	// Convert userName to string
+	result += userName + "\n";
+
+	// Convert highScores to string
+	for (auto pair : highScores) {
+		result += std::to_string(pair.first) + " ";
+		auto scores = pair.second;
+		while (!scores.empty()) {
+			result += std::to_string(scores.top()) + " ";
+			scores.pop();
+		}
+		result += "\n";
+	}
+
+	return result;
+}
+

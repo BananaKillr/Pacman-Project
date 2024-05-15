@@ -13,9 +13,10 @@ public:
 	unordered_map<int, priority_queue<int, std::vector<int>, std::less<int>>> highScores; // Key is level, value is all scores for that level
 
 	Save(string username); //To create new user
-	void fromString(string save); //To load user from file
-	void newScore(int level, int score); // Add score, check if in top 3
-	string toString();
+	void SetScores(unordered_map<int, priority_queue<int, std::vector<int>>> scores);
+	std::string ToString();
+private:
+
 };
 
 class Game
@@ -130,10 +131,8 @@ private:
 	void CalcEnemyMovement(); //Calculates the next move for the enemy, random if difficulty is 1 or 2, BFS if difficulty is 3, maybe split into seperate functions?
 	pair<int, int> NextStep(pair<int, int> enemyPosition); //Returns the next coordinate an enemy needs to move to, used in CalcEnemyMovement
 	void Update(); //Changes the coordinates of pacman based on Input(), checks if lose condiiton met
-	void saveToFile();
 	void LoadFromFile();
 	void ExitGame();
-	void MainLoop();
 	void CopyMap(char source[height][width], char dest[height][width]);
 	bool EnemyInPosition(int x, int y); // returns true if an enemy is in that position
 
