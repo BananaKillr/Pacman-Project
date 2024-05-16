@@ -5,6 +5,7 @@
 #include <Windows.h>
 #include <sstream>
 #include <fstream>	
+#include <limits>
 using namespace std;
 
 Game::Game() {
@@ -109,6 +110,10 @@ void Game::Menu() {
 		system("cls");
 		std::cout << "Pacman!\n" << endl << "1. New Game" << endl << "2. Continue" << endl << "3. Exit" << endl << "\nSelection: ";
 		std::cin >> input;
+		if (cin.fail()) {
+			std::cin.clear();
+			std::cin.ignore(255, '\n');
+		}
 	}
 
 	system("cls");
@@ -121,7 +126,7 @@ void Game::Menu() {
 		std::cin >> currentUser;
 		if (saves.find(currentUser) != saves.end()) {
 			std::cout << "User Already Exists. Continue Game.";
-			std::cin.ignore();
+			std::cin.ignore(255, '\n');
 			std::cin.get();
 			Menu();
 			return;
@@ -141,6 +146,10 @@ void Game::Menu() {
 			system("cls");
 			std::cout << "Select Difficulty\n\n1. Easy\n2. Medium\n3. Hard\n\nInput: ";
 			std::cin >> difficulty;
+			if (cin.fail()) {
+				std::cin.clear();
+				std::cin.ignore(255, '\n');
+			}
 		}
 		break;
 	case 2:
@@ -151,7 +160,7 @@ void Game::Menu() {
 		if (saves.find(currentUser) == saves.end()) 
 		{
 			std::cout << "User Does Not Exist. Start New Game.";
-			std::cin.ignore();
+			std::cin.ignore(255);
 			std::cin.get();
 			Menu();
 			return;
@@ -163,6 +172,10 @@ void Game::Menu() {
 			system("cls");
 			std::cout << "1. Play\n2. See Scores\n\nInput: ";
 			std::cin >> input;
+			if (cin.fail()) {
+				std::cin.clear();
+				std::cin.ignore(255, '\n');
+			}
 		}
 
 		switch (input) {
@@ -174,6 +187,10 @@ void Game::Menu() {
 				for (int i = 1; i <= levels.size(); i++) std::cout << levels[i] << endl;
 				std::cout << "\nInput: ";
 				std::cin >> level;
+				if (cin.fail()) {
+					std::cin.clear();
+					std::cin.ignore(255, '\n');
+				}
 			}
 
 			difficulty = 0;
@@ -181,6 +198,10 @@ void Game::Menu() {
 				system("cls");
 				std::cout << "Select Difficulty\n\n1. Easy\n2. Medium\n3. Hard\n\nInput: ";
 				std::cin >> difficulty;
+				if (cin.fail()) {
+					std::cin.clear();
+					std::cin.ignore(255, '\n');
+				}
 			}
 			break;
 		case 2:
@@ -191,6 +212,10 @@ void Game::Menu() {
 				for (int i = 1; i <= levels.size(); i++) std::cout << levels[i] << endl;
 				std::cout << "\nInput: ";
 				std::cin >> level;
+						if (cin.fail()) {
+			std::cin.clear();
+			std::cin.ignore(255, '\n');
+		}
 			}
 
 			system("cls");
@@ -272,7 +297,7 @@ void Game::Initialize() {
 		Draw();
 		Input();
 		Update();
-		Sleep(500);
+		Sleep(333);
 	}
 	
 	saves[currentUser]->highScores[level].push(score); // add score  to save
@@ -461,14 +486,14 @@ void Game::CopyMap(char source[height][width], char dest[height][width]) {
 
 void Game::ExitGame() {
 	system("cls");
-	std::cout << "Exitting...";
+	std::cout << "Exitting...\n";
 	std::string saveString;
 
 
 	for (auto save : saves) {
-		saveString += save.second->ToString();
+		saveString += save.second->ToString() + "\n";
 	}
-
+	saveString.pop_back();
 	std::ofstream output("saves.txt");
 
 	if (output.is_open()) {
